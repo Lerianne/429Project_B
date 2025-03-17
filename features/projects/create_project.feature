@@ -22,7 +22,7 @@ Feature: Create a new project
     And the response should contain the project ID, name "<Project Name>", and description "<Description>"
 
     Examples:
-      | Project Name    | Description            |
+      | Project Name    | Description           |
       | Fitness Plan    | Weekly workout plan   |
       | Grocery List    | Shopping items list   |
 

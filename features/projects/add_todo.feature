@@ -1,0 +1,38 @@
+Feature: Add a todo to a project
+  As a user, I want to add a todo item to a project
+  So that I can track tasks within specific projects.
+
+  Background:
+    Given the API is running
+    And I have an authenticated user
+    And a project named "<Project Name>" already exists
+
+  Scenario Outline: Successfully adding a todo to a project (Normal Flow)
+    When I send a POST request to "/projects/<Project ID>/tasks" with a todo name "<Todo Name>"
+    Then the response status should be 201
+    And the response should contain the todo ID and name "<Todo Name>"
+
+    Examples:
+      | Project Name   | Project ID | Todo Name    |
+      | Work Tasks    | 1          | Submit Report |
+      | Home Renovation | 2        | Buy Paint    |
+
+  Scenario Outline: Adding a todo with a due date (Alternate Flow)
+    When I send a POST request to "/projects/<Project ID>/tasks" with a todo name "<Todo Name>" and due date "<Due Date>"
+    Then the response status should be 201
+    And the response should contain the todo ID, name "<Todo Name>", and due date "<Due Date>"
+
+    Examples:
+      | Project Name   | Project ID | Todo Name      | Due Date  |
+      | Work Tasks    | 1         | Submit Report  | 2025-04-01 |
+      | Home Renovation | 2        | Buy Paint      | 2025-04-10 |
+
+  Scenario Outline: Attempting to add a todo to a non-existent project (Error Flow)
+    When I send a POST request to "/projects/<Invalid Project ID>/tasks" with a todo name "<Todo Name>"
+    Then the response status should be 404
+    And the response should contain an error message "Project not found"
+
+    Examples:
+      | Invalid Project ID | Todo Name     |
+      | 999               | Test Task     |
+      | 1000              | Fix the Bug   |
