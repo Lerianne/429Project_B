@@ -14,14 +14,6 @@ def step_clear_todos(context):
         for todo in todos:
             requests.delete(f"{BASE_URL}/todos/{todo['id']}")
 
-@given('a to-do item exists')
-def step_create_todo(context):
-    """Create a new to-do item and store its ID"""
-    payload = {"title": "Test Todo", "description": "Sample description"}
-    response = requests.post(f"{BASE_URL}/todos", json=payload)
-    assert response.status_code == 201, "Failed to create test to-do"
-    context.todo_id = response.json()["id"]  # Store generated ID dynamically
-
 @given('a to-do item with ID "{todo_id}" exists')
 def step_create_todo_with_id(context, todo_id):
     """Ensure a to-do item exists with a known ID"""
@@ -98,7 +90,7 @@ def step_validate_todo_with_empty_description(context, title):
 def step_validate_invalid_request(context):
     """Check if the API returns an error for invalid data"""
     response_data = context.response.json()
-    assert "error" in response_data, "Expected error message in response"
+    assert "error" in response_data, f"Expected error key in response, but got: {response_data}"
 
 @then('the to-do item "{todo_id}" should no longer exist')
 def step_validate_todo_deleted(context, todo_id):
