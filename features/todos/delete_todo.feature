@@ -27,13 +27,13 @@ Feature: Delete a to-do item
       | 3        |
       | 4        |
 
-  Scenario Outline: Attempting to delete a non-existent to-do item (Error Flow)
-    Given no to-do item with ID "<To-Do ID>" exists
+  Scenario Outline: Attempting to delete a completed to-do item (Error Flow)
+    Given a to-do item with ID "<To-Do ID>" exists and is marked as completed
     When I send a DELETE request to "/todos/<To-Do ID>"
-    Then the response status should be 404
-    And the response should contain an error message "To-do not found"
+    Then the response status should be 403
+    And the response should contain an error message "Completed to-dos cannot be deleted"
 
     Examples:
       | To-Do ID |
-      | 99       |
-      | 100      |
+      | 5        |
+      | 6        |

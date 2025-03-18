@@ -33,4 +33,4 @@ Feature: Create a new to-do item
     Examples:
       | Invalid Field        |
       | Missing Title        |
-      | Description as Number |
+      | Title as Number |
