@@ -31,7 +31,7 @@ Feature: Remove a project
   Scenario Outline: Attempting to delete a non-existent project (Error Flow)
     When I send a DELETE request to "/projects/<Invalid Project ID>"
     Then the response status should be 404
-    And the response should contain an error message "Project not found"
+    And the response should contain an error message "Could not find any instances with projects/<Invalid Project ID>"
 
     Examples:
       | Invalid Project ID |

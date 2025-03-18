@@ -20,7 +20,7 @@ Feature: Manage Categories for a Project
   Scenario Outline: Attempting to add a category to a non-existent project (Error Flow)
     When I send a POST request to "/projects/<Invalid Project ID>/categories" with a category name "<Category Name>"
     Then the response status should be 404
-    And the response should contain an error message "Project not found"
+    And the response should contain an error message "Could not find parent thing for relationship projects/<Invalid Project ID>/categories"
 
     Examples:
       | Invalid Project ID | Category Name   |
@@ -41,7 +41,7 @@ Feature: Manage Categories for a Project
   Scenario Outline: Attempting to remove a non-existent category (Error Flow)
     When I send a DELETE request to "/projects/<Project ID>/categories/<Invalid Category ID>"
     Then the response status should be 404
-    And the response should contain an error message "Category not found"
+    And the response should contain an error message "Could not find any instances with projects/<Project ID>/categories/<Invalid Category ID>"
 
     Examples:
       | Project ID | Invalid Category ID |

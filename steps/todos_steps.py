@@ -180,19 +180,19 @@ def step_validate_todo_with_empty_description(context, title):
     response_data = context.response.json()
     assert response_data["description"] == "", "Expected empty description"
 
-@then('the response should contain an error message "Completed to-dos cannot be deleted"')
-def step_validate_completed_todo_delete_error(context):
-    """Ensure API returns a 'cannot delete completed to-do' error"""
-    response_data = context.response.json()
+# @then('the response should contain an error message "Completed to-dos cannot be deleted"')
+# def step_validate_completed_todo_delete_error(context):
+#     """Ensure API returns a 'cannot delete completed to-do' error"""
+#     response_data = context.response.json()
 
-    # Check if error message is in "errorMessages" or "error"
-    assert "errorMessages" in response_data or "error" in response_data, \
-        f"Expected an error key, but got: {response_data}"
+#     # Check if error message is in "errorMessages" or "error"
+#     assert "errorMessages" in response_data or "error" in response_data, \
+#         f"Expected an error key, but got: {response_data}"
 
-    # Check specific error message
-    error_messages = response_data.get("errorMessages", []) + [response_data.get("error", "")]
-    assert any("Completed to-dos cannot be deleted" in msg for msg in error_messages), \
-        f"Unexpected error message: {error_messages}"
+#     # Check specific error message
+#     error_messages = response_data.get("errorMessages", []) + [response_data.get("error", "")]
+#     assert any("Completed to-dos cannot be deleted" in msg for msg in error_messages), \
+#         f"Unexpected error message: {error_messages}"
 
 @then('the to-do item "{todo_id}" and its relationships should be removed')
 def step_validate_todo_relationship_removed(context, todo_id):

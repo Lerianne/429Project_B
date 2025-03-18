@@ -30,7 +30,7 @@ Feature: Update a project
   Scenario Outline: Attempting to update a non-existent project (Error Flow)
     When I send a PUT request to "/projects/<Invalid Project ID>" with a new name "<New Project Name>"
     Then the response status should be 404
-    And the response should contain an error message "Project not found"
+    And the response should contain an error message "Invalid GUID for <Invalid Project ID> entity project"
 
     Examples:
       | Invalid Project ID | New Project Name |

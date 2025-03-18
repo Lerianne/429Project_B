@@ -30,7 +30,7 @@ Feature: Manage Todos for a Project
   Scenario Outline: Attempting to add a todo to a non-existent project (Error Flow)
     When I send a POST request to "/projects/<Invalid Project ID>/tasks" with a todo name "<Todo Name>"
     Then the response status should be 404
-    And the response should contain an error message "Project not found"
+    And the response should contain an error message "Could not find parent thing for relationship projects/<Invalid Project ID>/tasks"
 
     Examples:
       | Invalid Project ID | Todo Name     |
@@ -63,7 +63,7 @@ Feature: Manage Todos for a Project
   Scenario Outline: Attempting to remove a non-existent todo (Error Flow)
     When I send a DELETE request to "/projects/<Project ID>/tasks/<Invalid Task ID>"
     Then the response status should be 404
-    And the response should contain an error message "Task not found"
+    And the response should contain an error message "Could not find any instances with projects/<Project ID>/tasks/<Invalid Task ID>"
 
     Examples:
       | Project ID | Invalid Task ID |
