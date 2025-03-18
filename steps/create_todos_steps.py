@@ -3,7 +3,7 @@ from behave import given, when, then
 
 BASE_URL = "http://localhost:4567"
 
-### 🔹 GIVEN STEPS (Preconditions) ###
+### GIVEN STEPS (Preconditions) ###
 
 @given('the to-do list is empty')
 def step_clear_todos(context):
@@ -34,14 +34,14 @@ def step_no_todo_exists(context, todo_id):
     response = requests.get(f"{BASE_URL}/todos/{todo_id}")
     assert response.status_code == 404, f"To-do {todo_id} still exists!"
 
-    # ✅ Store the `todo_id` in context for later steps
+    # Store the `todo_id` in context for later steps
     context.todo_id = todo_id  # Ensure it's always set
 
 @given('a to-do item with ID "{todo_id}" exists and is marked as completed')
 def step_todo_completed(context, todo_id):
     """Ensure a to-do exists and is marked as completed"""
 
-    # Step 1: Create the to-do item
+    # Create the to-do item
     payload = {"title": f"Test Todo {todo_id}", "doneStatus": False}
     response = requests.post(f"{BASE_URL}/todos", json=payload)
     
@@ -50,7 +50,7 @@ def step_todo_completed(context, todo_id):
     # Store the created to-do ID
     context.todo_id = response.json()["id"]
 
-    # Step 2: Retrieve the existing to-do item (handle different API response structures)
+    # Retrieve the existing to-do item (handle different API response structures)
     todo_response = requests.get(f"{BASE_URL}/todos/{context.todo_id}")
     assert todo_response.status_code == 200, f"Failed to retrieve to-do, Response: {todo_response.text}"
 
@@ -62,7 +62,7 @@ def step_todo_completed(context, todo_id):
 
     assert "title" in existing_todo, f"API response did not contain 'title': {existing_todo}"
 
-    # Step 3: Mark it as completed (send all necessary fields)
+    # Mark it as completed (send all necessary fields)
     update_payload = {
         "title": existing_todo["title"],  # Ensure title is included
         "doneStatus": "true"  # Use correct boolean format
@@ -80,23 +80,23 @@ def step_todo_completed(context, todo_id):
 @given('a to-do item with ID "{todo_id}" exists and is linked to a project or category')
 def step_todo_linked_to_project_or_category(context, todo_id):
     """Ensure a to-do is linked to a project or category"""
-    # Step 1: Create the to-do item
+    # Create the to-do item
     step_create_todo(context, todo_id)
 
-    # Step 2: Create a project
+    # Create a project
     project_payload = {"title": f"Test Project {todo_id}"}
     project_response = requests.post(f"{BASE_URL}/projects", json=project_payload)
     assert project_response.status_code == 201, "Failed to create test project"
     project_id = project_response.json()["id"]
 
-    # Step 3: Link to-do to the project
+    # Link to-do to the project
     link_response = requests.post(f"{BASE_URL}/todos/{context.todo_id}/tasksof", json={"id": project_id})
     assert link_response.status_code == 201, f"Failed to link to-do {context.todo_id} to project {project_id}"
     
     # Store project ID in context
     context.project_id = project_id
 
-### 🔹 WHEN STEPS (Actions) ###
+### WHEN STEPS (Actions) ###
 
 @when('I send a POST request to "/todos" with a title "{title}" and description "{description}"')
 def step_create_todo_with_values(context, title, description):
@@ -158,7 +158,7 @@ def step_link_todo_to_project(context, todo_id, project_id):
     payload = {"id": project_id}
     context.response = requests.post(f"{BASE_URL}/todos/{context.todo_id}/tasksof", json=payload)
 
-### 🔹 THEN STEPS (Validations) ###
+### THEN STEPS (Validations) ###
 
 @then("the response status should be {status_code:d}")
 def step_check_status_code(context, status_code):
