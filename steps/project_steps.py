@@ -279,6 +279,24 @@ def step_validate_response(context, project_name):
     assert response_data["title"] == project_name, \
         f"Expected project name '{project_name}', got '{response_data['title']}'"
 
+@then('the response should confirm the todo was removed')
+def step_validate_todo_deletion(context):
+    """Ensure the API confirms the todo was removed."""
+
+    # The API response should have a successful status (200 OK or 204 No Content)
+    assert context.response.status_code in [200, 204], \
+        f"Expected 200 OK or 204 No Content, got {context.response.status_code}"
+
+    # Parse response to check for expected confirmation messages
+    response_data = get_json_response(context)
+
+    # If the API provides a success message in the response body
+    if response_data:
+        assert "success" in response_data or "message" in response_data, \
+            f"Expected a confirmation message in response, got: {response_data}"
+
+    print("\nDEBUG: Todo successfully removed.\n")
+
 
 @then('the response should contain the todo ID and name "{todo_name}"')
 def step_validate_todo_creation(context, todo_name):

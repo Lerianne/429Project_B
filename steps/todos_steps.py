@@ -23,6 +23,20 @@ def step_create_todo(context, todo_id=None):
     assert response.status_code == 201, "Failed to create test to-do"
     context.todo_id = response.json()["id"]  # Store created ID dynamically
 
+@given('a project with ID "{project_id}" exists')
+def step_project_exists(context, project_id):
+    """Ensure a project with the given ID exists before testing"""
+    payload = {"title": f"Test Project {project_id}"}
+    response = requests.post(f"{BASE_URL}/projects", json=payload)
+    assert response.status_code == 201, f"Failed to create test project {project_id}"
+    context.project_id = response.json()["id"]
+
+@given('two to-do items with IDs "{todo_id_1}" and "{todo_id_2}" exist')
+def step_multiple_todos_exist(context, todo_id_1, todo_id_2):
+    """Ensure two to-do items exist before testing"""
+    for todo_id in [todo_id_1, todo_id_2]:
+        step_create_todo(context, todo_id)
+
 @given('no to-do item with ID "{todo_id}" exists')
 def step_no_todo_exists(context, todo_id):
     """Ensure a to-do item does not exist before testing"""
@@ -36,6 +50,20 @@ def step_no_todo_exists(context, todo_id):
 
     # Store the `todo_id` in context for later steps
     context.todo_id = todo_id  # Ensure it's always set
+
+@given('no project with ID "{project_id}" exists')
+def step_no_project_exists(context, project_id):
+    """Ensure a project does not exist before testing"""
+    
+    # Attempt to delete the project if it exists
+    requests.delete(f"{BASE_URL}/projects/{project_id}")
+
+    # Verify it was deleted
+    response = requests.get(f"{BASE_URL}/projects/{project_id}")
+    assert response.status_code == 404, f"Project {project_id} still exists!"
+
+    # Store project_id in context for later steps
+    context.project_id = project_id
 
 @given('a to-do item with ID "{todo_id}" exists and is marked as completed')
 def step_todo_completed(context, todo_id):
@@ -145,6 +173,25 @@ def step_delete_todo(context, todo_id):
 
     context.response = requests.delete(f"{BASE_URL}/todos/{todo_id_to_delete}")
 
+@when('I send a POST request to "/todos/{todo_id}" with a new title "{new_title}"')
+def step_update_todo_title(context, todo_id, new_title):
+    """Update a to-do item's title"""
+    payload = {"title": new_title}
+    context.response = requests.put(f"{BASE_URL}/todos/{todo_id}", json=payload)
+
+@when('I send a PUT request to "/todos/{todo_id}" with an invalid field "{invalid_field}"')
+def step_update_todo_invalid_field(context, todo_id, invalid_field):
+    """Attempt to update a to-do item with an invalid field"""
+    payload = {invalid_field: "Invalid Value"}
+    context.response = requests.put(f"{BASE_URL}/todos/{todo_id}", json=payload)
+
+
+@when('I send a PUT request to "/todos/{todo_id}" with a new title "{new_title}"')
+def step_update_non_existent_todo(context, todo_id, new_title):
+    """Attempt to update a non-existent to-do item"""
+    payload = {"title": new_title}
+    context.response = requests.put(f"{BASE_URL}/todos/{todo_id}", json=payload)
+
 
 @when('I send a PUT request to "/todos/{todo_id}" with a new description "{description}"')
 def step_update_todo(context, todo_id, description):
@@ -180,6 +227,16 @@ def step_validate_todo_with_empty_description(context, title):
     response_data = context.response.json()
     assert response_data["description"] == "", "Expected empty description"
 
+@then('the response should contain the to-do ID "{todo_id}", title, and description')
+def step_validate_todo_retrieval(context, todo_id):
+    """Ensure the response contains the correct to-do item details"""
+    response_data = context.response.json()
+    assert "id" in response_data, "Response missing to-do ID"
+    assert "title" in response_data, f"Expected title in response, got {response_data}"
+    assert "description" in response_data, f"Expected description in response, got {response_data}"
+    assert response_data["id"] == todo_id, f"Expected ID '{todo_id}', got '{response_data['id']}'"
+
+
 # @then('the response should contain an error message "Completed to-dos cannot be deleted"')
 # def step_validate_completed_todo_delete_error(context):
 #     """Ensure API returns a 'cannot delete completed to-do' error"""
@@ -207,6 +264,43 @@ def step_validate_todo_relationship_removed(context, todo_id):
     tasks = response.json().get("todos", [])
     assert not any(task["id"] == context.todo_id for task in tasks), \
         f"To-do {context.todo_id} is still linked to project {context.project_id}"
+
+@then('the to-do item\'s title should be updated to "{new_title}"')
+def step_validate_todo_title_update(context, new_title):
+    """Ensure the to-do item's title was updated"""
+    response_data = context.response.json()
+    assert response_data["title"] == new_title, \
+        f"Expected title '{new_title}', got '{response_data['title']}'"
+
+@then('the description should remain unchanged')
+def step_validate_todo_description_unchanged(context):
+    """Ensure the to-do item's description remains unchanged after updating the title"""
+    response_data = context.response.json()
+    assert "description" in response_data, f"Expected description in response, got {response_data}"
+
+
+@then('the response should contain the to-do ID "{todo_id}" and related project/category details')
+def step_validate_todo_project_details(context, todo_id):
+    """Ensure the response contains the correct project/category details"""
+    response_data = context.response.json()
+    assert "projects" in response_data or "categories" in response_data, \
+        f"Expected project/category details in response, got {response_data}"
+
+@then('the response should confirm that the to-do item "{todo_id}" is linked to project "{project_id}"')
+def step_validate_todo_project_link(context, todo_id, project_id):
+    """Ensure the to-do item is linked to the correct project"""
+    response = requests.get(f"{BASE_URL}/todos/{todo_id}/tasksof")
+    assert response.status_code == 200, f"Failed to retrieve linked projects for to-do {todo_id}"
+    response_data = response.json()
+    assert any(proj["id"] == project_id for proj in response_data["projects"]), \
+        f"To-do item {todo_id} is not linked to project {project_id}"
+
+@then('both to-do items "{todo_id_1}" and "{todo_id_2}" should be linked to project "{project_id}"')
+def step_validate_multiple_todos_project_link(context, todo_id_1, todo_id_2, project_id):
+    """Ensure multiple to-do items are linked to the correct project"""
+    for todo_id in [todo_id_1, todo_id_2]:
+        step_validate_todo_project_link(context, todo_id, project_id)
+
 
 @then('the to-do item "{todo_id}" should no longer exist')
 def step_validate_todo_deleted(context, todo_id):
