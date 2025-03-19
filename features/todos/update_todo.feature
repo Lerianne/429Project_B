@@ -44,9 +44,11 @@ Feature: Update a to-do item
     Given no to-do item with ID "<To-Do ID>" exists
     When I send a PUT request to "/todos/<To-Do ID>" with a new title "<New Title>"
     Then the response status should be 404
-    And the response should contain an error message "To-do not found"
+    And the response should contain an error message "Invalid GUID for <To-Do ID> entity todo"
 
-    Examples:
-      | To-Do ID | New Title          |
-      | 99       | Plan vacation      |
-      | 100      | Organize files     |
+  Examples:
+    | To-Do ID | New Title          |
+    | 99       | Plan vacation      |
+    | 100      | Organize files     |
+
+
