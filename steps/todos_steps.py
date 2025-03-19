@@ -70,7 +70,7 @@ def step_todo_completed(context, todo_id):
     """Ensure a to-do exists and is marked as completed"""
 
     # Create the to-do item
-    payload = {"title": f"Test Todo {todo_id}", "doneStatus": False}
+    payload = {"title": f"Test Todo {todo_id}", "doneStatus": False}  # Ensure initially set to False
     response = requests.post(f"{BASE_URL}/todos", json=payload)
     
     assert response.status_code == 201, f"Failed to create test to-do, Response: {response.text}"
@@ -90,18 +90,18 @@ def step_todo_completed(context, todo_id):
 
     assert "title" in existing_todo, f"API response did not contain 'title': {existing_todo}"
 
-    # Mark it as completed (send all necessary fields)
+    # Ensure doneStatus is sent as a boolean, not a string
     update_payload = {
         "title": existing_todo["title"],  # Ensure title is included
-        "doneStatus": "true"  # Use correct boolean format
+        "doneStatus": True  # Correct format (boolean, not string)
     }
     update_response = requests.put(f"{BASE_URL}/todos/{context.todo_id}", json=update_payload)
 
-    print("\n==== DEBUG: Marking To-Do as Completed ====")
-    print(f"Sent Payload: {update_payload}")
-    print(f"Response Status: {update_response.status_code}")
-    print(f"Response Body: {update_response.text}")
-    print("=====================================\n")
+    # print("\n==== DEBUG: Marking To-Do as Completed ====")
+    # print(f"Sent Payload: {update_payload}")
+    # print(f"Response Status: {update_response.status_code}")
+    # print(f"Response Body: {update_response.text}")
+    # print("=====================================\n")
 
     assert update_response.status_code == 200, f"Failed to mark to-do as completed, Response: {update_response.text}"
 
@@ -281,10 +281,26 @@ def step_validate_todo_description_unchanged(context):
 
 @then('the response should contain the to-do ID "{todo_id}" and related project/category details')
 def step_validate_todo_project_details(context, todo_id):
-    """Ensure the response contains the correct project/category details"""
+    """Ensure the response contains the correct project/category details."""
     response_data = context.response.json()
-    assert "projects" in response_data or "categories" in response_data, \
-        f"Expected project/category details in response, got {response_data}"
+
+    # Extract the relevant todo item from the response
+    todo_items = response_data.get("todos", [])
+    assert todo_items, f"Expected 'todos' list in response, got {response_data}"
+
+    todo = next((t for t in todo_items if t["id"] == todo_id), None)
+    assert todo, f"To-do item '{todo_id}' not found in response: {todo_items}"
+
+    # Debugging Output
+    # print("\n===== DEBUG: API Response for To-Do Retrieval =====")
+    # print(response_data)
+    # print("====================================================\n")
+
+    # Ensure there is a linked project or category (via tasksof)
+    assert "tasksof" in todo, f"Expected 'tasksof' key in response, but got {todo}"
+    assert len(todo["tasksof"]) > 0, f"Expected 'tasksof' to contain linked items, but got empty list in {todo}"
+
+    print(f"To-Do '{todo_id}' is correctly linked to a project/category.")
 
 @then('the response should confirm that the to-do item "{todo_id}" is linked to project "{project_id}"')
 def step_validate_todo_project_link(context, todo_id, project_id):

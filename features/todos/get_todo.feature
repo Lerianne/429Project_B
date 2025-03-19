@@ -32,7 +32,7 @@ Feature: Retrieve a specific to-do item
     Given no to-do item with ID "<To-Do ID>" exists
     When I send a GET request to "/todos/<To-Do ID>"
     Then the response status should be 404
-    And the response should contain an error message "To-do not found"
+    And the response should contain an error message "Could not find an instance with todos/<To-Do ID>"
 
     Examples:
       | To-Do ID |

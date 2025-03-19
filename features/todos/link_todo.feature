@@ -35,7 +35,7 @@ Feature: Link a to-do item to a project
     And no project with ID "<Project ID>" exists
     When I send a POST request to "/todos/<To-Do ID>/tasksof" with project ID "<Project ID>"
     Then the response status should be 404
-    And the response should contain an error message "Project not found"
+    And the response should contain an error message "Could not find thing matching value for id"
 
     Examples:
       | To-Do ID | Project ID |

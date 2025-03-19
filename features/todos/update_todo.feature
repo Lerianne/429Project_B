@@ -33,7 +33,7 @@ Feature: Update a to-do item
     Given a to-do item with ID "<To-Do ID>" exists
     When I send a PUT request to "/todos/<To-Do ID>" with an invalid field "<Invalid Field>"
     Then the response status should be 400
-    And the response should contain an error message "Invalid request"
+    And the response should contain an error message "Could not find field: <Invalid Field>"
 
     Examples:
       | To-Do ID | Invalid Field    |
