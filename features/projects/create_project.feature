@@ -33,6 +33,7 @@ Feature: Create a new project
     And the response should contain an error message "Project already exists"
 
     Examples:
+    
       | Project Name    |
       | Work Tasks      |
       | Home Renovation |
